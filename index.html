@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduSphere Pro — Next-Gen Multi-Campus College ERP</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js for BI Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="bg-[#060913] text-slate-100 antialiased selection:bg-indigo-500 selection:text-white overflow-x-hidden">
+
+  <!-- AMBIENT GLOW BACKGROUND -->
+  <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+    <div class="absolute -top-40 -left-40 w-96 h-96 bg-indigo-600/15 rounded-full blur-[130px]"></div>
+    <div class="absolute top-1/3 -right-40 w-96 h-96 bg-purple-600/15 rounded-full blur-[130px]"></div>
+    <div class="absolute -bottom-40 left-1/3 w-96 h-96 bg-emerald-600/10 rounded-full blur-[130px]"></div>
+  </div>
+
+  <!-- Local demo server status -->
+  <div class="utility-bar relative z-30 bg-slate-950/90 border-b border-slate-800/80 px-4 py-1.5 text-[11px] flex flex-wrap items-center justify-between gap-2">
+    <div class="utility-status flex items-center gap-4 flex-wrap">
+      <span class="flex items-center gap-1.5 text-emerald-400 font-mono">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+        Local demo • no college services connected
+      </span>
+      <span class="text-slate-400 font-mono" id="topSubdomainBar">
+        Demo campus: Main Campus (Kolkata HQ)
+      </span>
+      <span class="hidden md:inline text-indigo-400 font-mono">
+        Node HTTP server • loopback only • admin session required for private records
+      </span>
+    </div>
+    <div class="utility-actions flex items-center gap-2">
+      <button type="button" onclick="toggleExpoSimulator()" class="utility-action utility-action-simulator">
+        <span class="utility-action-icon"><i data-lucide="smartphone" class="w-4 h-4"></i></span>
+        <span class="utility-action-copy"><span>Mobile Preview</span><small>Expo simulator</small></span>
+      </button>
+      <button type="button" onclick="toggleAICopilot()" class="utility-action utility-action-ai">
+        <span class="utility-action-icon"><i data-lucide="sparkles" class="w-4 h-4"></i></span>
+        <span class="utility-action-copy"><span>AetherAI Sentinel</span><small>College assistant</small></span>
+      </button>
+      <label class="language-picker" for="langSelect">
+        <i data-lucide="languages" class="w-4 h-4" aria-hidden="true"></i>
+        <span class="sr-only">Choose display language</span>
+        <select id="langSelect" aria-label="Choose display language" onchange="switchLanguage(this.value)">
+          <option value="en">🇬🇧 English</option>
+          <option value="bn">🇮🇳 বাংলা</option>
+          <option value="hi">🇮🇳 हिन्दी</option>
+        </select>
+        <i data-lucide="chevron-down" class="language-chevron w-3.5 h-3.5" aria-hidden="true"></i>
+      </label>
+    </div>
+  </div>
+
+  <section class="campus-overview-bar" aria-label="Campus overview and registration">
+    <div class="campus-overview-selection">
+      <span class="campus-overview-icon"><i data-lucide="building-2" class="w-5 h-5"></i></span>
+      <div class="campus-overview-label">
+        <strong>Campus overview</strong>
+        <small id="campusOverviewName">Main Campus (Kolkata HQ)</small>
+      </div>
+      <label class="campus-select-wrap" for="campusSwitcherTop">
+        <span class="sr-only">Select campus</span>
+        <select id="campusSwitcherTop" onchange="changeCampus(this.value)" aria-label="Select campus to view status and registration">
+          <option value="kolkata">🏛️ Main Campus (Kolkata HQ)</option>
+          <option value="saltlake">💻 Salt Lake AI &amp; FinTech Campus</option>
+          <option value="medinipur">🌿 Paschim Medinipur Tech Campus</option>
+        </select>
+        <i data-lucide="chevron-down" class="w-4 h-4" aria-hidden="true"></i>
+      </label>
+      <div class="campus-network-rail" role="group" aria-label="Quick campus selection">
+        <span class="campus-network-caption"><span></span> CAMPUS DEMO NETWORK</span>
+        <div class="campus-network-track">
+          <button type="button" class="campus-network-node is-active" data-campus="kolkata" aria-label="Show Main Campus Kolkata status" aria-pressed="true" onclick="changeCampus('kolkata')">
+            <span class="campus-network-dot"></span><span>Kolkata</span>
+          </button>
+          <button type="button" class="campus-network-node" data-campus="saltlake" aria-label="Show Salt Lake campus status" aria-pressed="false" onclick="changeCampus('saltlake')">
+            <span class="campus-network-dot"></span><span>Salt Lake</span>
+          </button>
+          <button type="button" class="campus-network-node" data-campus="medinipur" aria-label="Show Paschim Medinipur campus status" aria-pressed="false" onclick="changeCampus('medinipur')">
+            <span class="campus-network-dot"></span><span>Medinipur</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="campus-overview-stats" aria-live="polite">
+      <div class="campus-overview-stat">
+        <span>Enrolled students</span>
+        <strong id="campusOverviewStudents">5,420</strong>
+      </div>
+      <div class="campus-overview-stat">
+        <span>Faculty</span>
+        <strong id="campusOverviewFaculty">340</strong>
+      </div>
+      <div class="campus-overview-stat">
+        <span>Attendance</span>
+        <strong id="campusOverviewAttendance">95.4%</strong>
+      </div>
+      <button type="button" class="campus-registration-link" onclick="switchView('admissions')">
+        <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+        <span>Admissions &amp; Registration</span>
+        <i data-lucide="arrow-up-right" class="w-3.5 h-3.5" aria-hidden="true"></i>
+      </button>
+    </div>
+  </section>
+
+  <!-- MAIN APPLICATION SHELL -->
+  <div class="relative z-10 flex min-h-[calc(100vh-32px)]">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="w-72 bg-slate-900/65 backdrop-blur-2xl border-r border-slate-800/80 flex flex-col justify-between shrink-0 hidden xl:flex">
+      <div>
+        <!-- Brand Logo -->
+        <div class="p-5 border-b border-slate-800/80 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+              <i data-lucide="layers" class="w-6 h-6 text-white"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <h1 class="font-extrabold text-lg tracking-tight text-white">EduSphere</h1>
+                <span class="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">PRO</span>
+              </div>
+              <p class="text-[11px] text-slate-400" data-i18n="brandSub">Multi-Campus Modular ERP</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Multi-Campus Tenancy Switcher -->
+        <div class="p-3.5 border-b border-slate-800/80 space-y-2.5">
+          <div>
+            <label class="text-[10px] font-mono uppercase tracking-wider text-slate-400 block mb-1" data-i18n="campusLabel">
+              1. Multi-Campus Tenant (Subdomain)
+            </label>
+            <select id="campusSwitcher" onchange="changeCampus(this.value)" class="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+              <option value="kolkata">🏛️ Main Campus (Kolkata HQ)</option>
+              <option value="saltlake">💻 Salt Lake AI & FinTech Campus</option>
+              <option value="medinipur">🌿 Paschim Medinipur Tech Campus</option>
+            </select>
+          </div>
+
+          <!-- All 11 Poster User Roles Switcher -->
+          <div>
+            <label class="text-[10px] font-mono uppercase tracking-wider text-slate-400 block mb-1" data-i18n="roleLabel">
+              2. Demo User Role (11 Examples)
+            </label>
+            <select id="roleSwitcher" onchange="changeUserRole(this.value)" class="w-full bg-indigo-950/50 border border-indigo-500/40 rounded-xl px-3 py-2 text-xs text-indigo-200 font-medium focus:outline-none">
+              <option value="student">🎓 1. Student (Student Portal)</option>
+              <option value="applicant">📝 2. Applicant (Admission Enquiry)</option>
+              <option value="parent">👨‍👩‍👦 3. Parent (Parent Portal)</option>
+              <option value="faculty">👨‍🏫 4. Faculty / Teacher (Faculty Portal)</option>
+              <option value="hod">🏅 5. Head of Dept - HoD (Academic Console)</option>
+              <option value="registrar">🗂️ 6. Registrar / Admin Staff</option>
+              <option value="accountant">💳 7. Accountant (Fees, UPI & GST)</option>
+              <option value="librarian">📚 8. Librarian (Book Issue/Return)</option>
+              <option value="warden">🏢 9. Hostel Warden (Rooms & Mess)</option>
+              <option value="transport">🚌 10. Transport Manager (Bus GPS)</option>
+              <option value="principal">👑 11. Principal / Management (BI)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="p-3 space-y-1">
+          <button onclick="switchView('overview')" id="tab-overview" class="sidebar-btn active w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold">
+            <span class="flex items-center gap-2.5"><i data-lucide="bar-chart-big" class="w-4 h-4"></i> <span data-i18n="navOverview">Command Center & BI Charts</span></span>
+            <span class="text-[10px] font-mono bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded">Demo</span>
+          </button>
+
+          <button onclick="switchView('modules')" id="tab-modules" class="sidebar-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold">
+            <span class="flex items-center gap-2.5"><i data-lucide="boxes" class="w-4 h-4"></i> <span data-i18n="navModules">18 NestJS Modules (Interactive)</span></span>
+            <span class="text-[10px] font-mono bg-cyan-500/20 text-cyan-300 px-1.5 py-0.5 rounded">18</span>
+          </button>
+
+          <button onclick="switchView('admissions')" id="tab-admissions" class="sidebar-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold">
+            <span class="flex items-center gap-2.5"><i data-lucide="shield-check" class="w-4 h-4"></i> <span data-i18n="navAdmissions">Admissions Demo</span></span>
+            <span class="text-[10px] font-mono bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded">Local</span>
+          </button>
+
+          <button onclick="switchView('attendance')" id="tab-attendance" class="sidebar-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold">
+            <span class="flex items-center gap-2.5"><i data-lucide="qr-code" class="w-4 h-4"></i> <span data-i18n="navAttendance">QR Demo + 50m Geo-Fence</span></span>
+            <span class="text-[10px] font-mono bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded">15s</span>
+          </button>
+
+          <button onclick="switchView('finance')" id="tab-finance" class="sidebar-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold">
+            <span class="flex items-center gap-2.5"><i data-lucide="indian-rupee" class="w-4 h-4"></i> <span data-i18n="navFinance">Fees & Payment Demo</span></span>
+            <span class="text-[10px] font-mono bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded">Demo</span>
+          </button>
+
+          <button onclick="switchView('transport')" id="tab-transport" class="sidebar-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold">
+            <span class="flex items-center gap-2.5"><i data-lucide="radar" class="w-4 h-4"></i> <span data-i18n="navTransport">Animated Bus GPS Demo</span></span>
+            <span class="text-[10px] font-mono bg-rose-500/20 text-rose-300 px-1.5 py-0.5 rounded">Demo</span>
+          </button>
+
+          <button onclick="switchView('lifecycle')" id="tab-lifecycle" class="sidebar-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold">
+            <span class="flex items-center gap-2.5"><i data-lucide="git-merge" class="w-4 h-4"></i> <span data-i18n="navLifecycle">9-Step Lifecycle & Infra Stack</span></span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Bottom Data & Infra Telemetry -->
+      <div class="p-3.5 border-t border-slate-800/80 bg-slate-950/80 text-[11px] space-y-1.5 font-mono">
+        <div class="flex justify-between text-slate-400">
+          <span>Local SQLite Database</span>
+          <span class="text-emerald-400">● On this device</span>
+        </div>
+        <div class="flex justify-between text-slate-400">
+          <span>QR animation demo</span>
+          <span class="text-indigo-400" id="sidebarQrTimer">Refresh: 15s</span>
+        </div>
+        <div class="flex justify-between text-slate-400">
+          <span>Local UI search • no cloud storage</span>
+          <span class="text-amber-400">Demo PDF preview</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CENTER WORKSPACE -->
+    <div class="flex-1 flex flex-col min-w-0">
+
+      <!-- HEADER BAR -->
+      <header class="dashboard-header bg-slate-900/60 backdrop-blur-xl border-b border-slate-800/80 px-6 py-3 flex flex-wrap items-center justify-between gap-4 sticky top-0 z-20">
+        <!-- Instant Meilisearch Bar -->
+        <div class="global-search relative flex-1 max-w-xl">
+          <i data-lucide="search" class="global-search-icon w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2" aria-hidden="true"></i>
+          <input
+            type="text"
+            id="globalSearchInput"
+            oninput="runMeilisearch(this.value)"
+            aria-label="Search students, books, transactions, and faculty"
+            aria-controls="searchDropdown"
+            autocomplete="off"
+            placeholder="Search students, books, transactions, faculty..."
+            class="global-search-input w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-11 pr-24 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+          />
+          <span class="global-search-hint absolute right-3 top-1/2 -translate-y-1/2" aria-hidden="true">
+            <kbd>⌘</kbd><kbd> K</kbd>
+          </span>
+          <div id="searchDropdown" class="hidden absolute left-0 right-0 mt-2 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl z-50 p-3 max-h-80 overflow-y-auto"></div>
+        </div>
+
+        <!-- Deliverables & User Pill -->
+        <div class="flex items-center gap-2.5">
+          <div class="hidden 2xl:flex items-center gap-1.5 bg-slate-950/90 p-1 rounded-xl border border-slate-800">
+            <button onclick="openPdfModal('idcard')" class="px-2.5 py-1.5 text-[11px] font-semibold rounded-lg bg-indigo-500/15 text-indigo-300 hover:bg-indigo-500/25 flex items-center gap-1">
+              <i data-lucide="id-card" class="w-3.5 h-3.5"></i> ID Card
+            </button>
+            <button onclick="openPdfModal('hallticket')" class="px-2.5 py-1.5 text-[11px] font-semibold rounded-lg bg-purple-500/15 text-purple-300 hover:bg-purple-500/25 flex items-center gap-1">
+              <i data-lucide="ticket" class="w-3.5 h-3.5"></i> Hall Ticket
+            </button>
+            <button onclick="openPdfModal('marksheet')" class="px-2.5 py-1.5 text-[11px] font-semibold rounded-lg bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25 flex items-center gap-1">
+              <i data-lucide="award" class="w-3.5 h-3.5"></i> Mark Sheet
+            </button>
+            <button onclick="openPdfModal('feereceipt')" class="px-2.5 py-1.5 text-[11px] font-semibold rounded-lg bg-amber-500/15 text-amber-300 hover:bg-amber-500/25 flex items-center gap-1">
+              <i data-lucide="receipt" class="w-3.5 h-3.5"></i> GST Receipt
+            </button>
+          </div>
+
+          <div class="notification-control relative">
+            <button
+              id="notificationToggle"
+              type="button"
+              onclick="toggleNotifications()"
+              class="relative p-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-200"
+              title="Open notifications"
+              aria-label="Open notifications"
+              aria-controls="notificationPanel"
+              aria-expanded="false"
+            >
+              <i data-lucide="bell-ring" class="w-4 h-4 text-indigo-400"></i>
+              <span id="bellBadge" class="notification-badge absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 text-[10px] font-bold flex items-center justify-center text-white">4</span>
+            </button>
+            <section id="notificationPanel" class="notification-panel hidden" aria-label="Notifications">
+              <div class="notification-panel-header">
+                <div>
+                  <h2>Notifications</h2>
+                  <p id="notificationSummary">Recent campus updates</p>
+                </div>
+                <button type="button" class="notification-close" onclick="toggleNotifications(false)" aria-label="Close notifications">
+                  <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+              </div>
+              <div id="notificationList" class="notification-list"></div>
+              <div class="notification-panel-footer">
+                <button type="button" onclick="pushSocketEvent()">Simulate live bus alert</button>
+                <button type="button" onclick="markNotificationsRead()">Mark all read</button>
+              </div>
+            </section>
+          </div>
+
+          <div class="flex items-center gap-2.5 pl-2 border-l border-slate-800">
+            <div id="headerAvatar" class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-xs text-white shadow">
+              DS
+            </div>
+            <div class="hidden sm:block">
+              <p id="headerUserName" class="text-xs font-bold text-white leading-none">Demo Student</p>
+              <p id="headerUserRole" class="text-[10px] font-mono text-indigo-400 mt-0.5">Student Portal • Demo Account</p>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- MOBILE NAV -->
+      <div class="flex xl:hidden overflow-x-auto gap-2 p-3 bg-slate-900/90 border-b border-slate-800 text-xs">
+        <button onclick="switchView('overview')" class="px-3 py-1.5 rounded-lg bg-slate-800 whitespace-nowrap">BI Overview</button>
+        <button onclick="switchView('modules')" class="px-3 py-1.5 rounded-lg bg-slate-800 whitespace-nowrap">18 Modules</button>
+        <button onclick="switchView('admissions')" class="px-3 py-1.5 rounded-lg bg-slate-800 whitespace-nowrap">Admissions Demo</button>
+        <button onclick="switchView('attendance')" class="px-3 py-1.5 rounded-lg bg-slate-800 whitespace-nowrap">QR Attendance</button>
+        <button onclick="switchView('finance')" class="px-3 py-1.5 rounded-lg bg-slate-800 whitespace-nowrap">Fee Demo</button>
+        <button onclick="switchView('transport')" class="px-3 py-1.5 rounded-lg bg-slate-800 whitespace-nowrap">Bus GPS Demo</button>
+        <button onclick="switchView('lifecycle')" class="px-3 py-1.5 rounded-lg bg-slate-800 whitespace-nowrap">9-Step Lifecycle</button>
+      </div>
+
+      <!-- DYNAMIC VIEWPORT -->
+      <main id="appViewport" class="p-6 space-y-6 flex-1 overflow-y-auto"></main>
+    </div>
+
+    <!-- RIGHT DOCKED EXPO MOBILE APP SIMULATOR (Better than the poster!) -->
+    <aside id="expoSimulatorDrawer" class="w-80 bg-slate-950/95 border-l border-slate-800 p-4 flex flex-col justify-between shrink-0 hidden 2xl:flex">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-xs font-bold text-white flex items-center gap-1.5">
+          <i data-lucide="smartphone" class="w-4 h-4 text-purple-400"></i>
+          Expo-style Mobile Preview (Demo)
+        </span>
+        <button onclick="toggleExpoSimulator()" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Virtual iPhone Frame -->
+      <div class="phone-frame mx-auto w-full max-w-[270px] bg-slate-900 border-[6px] border-slate-800 rounded-[36px] p-4 shadow-2xl flex flex-col justify-between h-[540px] relative overflow-hidden">
+        <!-- Phone Notch -->
+        <div class="w-24 h-4 bg-slate-950 rounded-full mx-auto mb-2 flex items-center justify-center">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        </div>
+
+        <!-- Phone Content -->
+        <div id="expoPhoneScreen" class="flex-1 overflow-y-auto space-y-3 text-xs pr-1">
+          <!-- Populated dynamically by script.js -->
+        </div>
+
+        <!-- Phone Bottom Tab Bar -->
+        <div class="pt-2 border-t border-slate-800 grid grid-cols-3 gap-1 text-[10px] text-center">
+          <button onclick="switchPhoneMode('qr')" class="p-1.5 rounded-lg bg-indigo-500/20 text-indigo-300 font-semibold">QR Scan</button>
+          <button onclick="switchPhoneMode('gps')" class="p-1.5 rounded-lg bg-slate-800 text-slate-300">Bus GPS</button>
+          <button onclick="switchPhoneMode('id')" class="p-1.5 rounded-lg bg-slate-800 text-slate-300">Digital ID</button>
+        </div>
+      </div>
+
+      <p class="text-[11px] text-center text-slate-400 mt-3 font-mono">
+        Mobile app preview • simulated bus updates
+      </p>
+    </aside>
+
+  </div>
+
+  <!-- AetherAI Sentinel College Receptionist -->
+  <div id="aiCopilotDrawer" class="fixed bottom-5 right-5 w-96 bg-slate-900/95 backdrop-blur-2xl border border-indigo-500/40 rounded-2xl shadow-2xl z-50 hidden flex-col overflow-hidden">
+    <div class="px-4 py-3 bg-gradient-to-r from-indigo-600/40 to-purple-600/40 border-b border-slate-800 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <i data-lucide="sparkles" class="w-4 h-4 text-indigo-300"></i>
+        <span class="text-xs font-bold text-white">AetherAI Sentinel • College Receptionist</span>
+      </div>
+      <button onclick="toggleAICopilot()" class="text-slate-300 hover:text-white">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+    <div id="aiChatMessages" class="p-4 space-y-3 max-h-72 overflow-y-auto text-xs">
+      <div class="assistant-message assistant-message-bot">
+        Namaskar, Sir/Madam. I’m AetherAI Sentinel, the college receptionist and academic information assistant for four colleges in Paschim Medinipur. How may I help you?
+      </div>
+    </div>
+    <div class="p-3 border-t border-slate-800 flex gap-2">
+      <input id="aiPromptInput" type="text" placeholder="Ask about admissions, fees, courses, hostel..." class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none" onkeydown="if(event.key==='Enter') sendAIPrompt()" />
+      <button onclick="sendAIPrompt()" class="px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white">Send</button>
+    </div>
+  </div>
+
+  <div id="dataVaultLayer" class="data-vault-layer hidden" role="dialog" aria-modal="true" aria-labelledby="dataVaultTitle">
+    <section class="data-vault-panel">
+      <header class="data-vault-header">
+        <div class="data-vault-brand">
+          <span class="data-vault-brand-icon"><i data-lucide="database" class="w-5 h-5"></i></span>
+          <div>
+            <h2 id="dataVaultTitle">EduSphere Data Vault</h2>
+            <p>Local SQLite storage · Admin access only</p>
+          </div>
+        </div>
+        <button type="button" class="data-vault-close" onclick="closeDataVault()" aria-label="Close Data Vault">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </header>
+
+      <div id="vaultSetupView" class="vault-auth-view hidden">
+        <span class="vault-auth-icon"><i data-lucide="shield-check" class="w-6 h-6"></i></span>
+        <h3>Create the local admin account</h3>
+        <p>This first-run setup is available only until an admin account is created. Use a new passphrase with at least 12 characters. Do not reuse the password shared in chat.</p>
+        <form id="vaultSetupForm" class="vault-auth-form">
+          <label for="vaultSetupPassword">New admin passphrase</label>
+          <div class="vault-password-wrap">
+            <input id="vaultSetupPassword" type="password" minlength="12" maxlength="256" autocomplete="new-password" required />
+            <button type="button" class="vault-password-toggle" aria-label="Show new admin passphrase" aria-pressed="false" onclick="toggleVaultPassword('vaultSetupPassword', this)">
+              <i data-lucide="eye" class="w-4 h-4" aria-hidden="true"></i>
+            </button>
+          </div>
+          <label for="vaultSetupConfirm">Confirm passphrase</label>
+          <div class="vault-password-wrap">
+            <input id="vaultSetupConfirm" type="password" minlength="12" maxlength="256" autocomplete="new-password" required />
+            <button type="button" class="vault-password-toggle" aria-label="Show confirmation passphrase" aria-pressed="false" onclick="toggleVaultPassword('vaultSetupConfirm', this)">
+              <i data-lucide="eye" class="w-4 h-4" aria-hidden="true"></i>
+            </button>
+          </div>
+          <p id="vaultSetupMessage" class="vault-auth-message" role="status"></p>
+          <button type="submit" class="vault-primary-button">Create admin account</button>
+        </form>
+      </div>
+
+      <div id="vaultLoginView" class="vault-auth-view hidden">
+        <span class="vault-auth-icon"><i data-lucide="lock-keyhole" class="w-6 h-6"></i></span>
+        <h3>Admin sign-in</h3>
+        <p>Sign in to view and manage records stored in the local database.</p>
+        <form id="vaultLoginForm" class="vault-auth-form">
+          <label for="vaultLoginPassword">Admin passphrase</label>
+          <div class="vault-password-wrap">
+            <input id="vaultLoginPassword" type="password" autocomplete="current-password" required />
+            <button type="button" class="vault-password-toggle" aria-label="Show admin passphrase" aria-pressed="false" onclick="toggleVaultPassword('vaultLoginPassword', this)">
+              <i data-lucide="eye" class="w-4 h-4" aria-hidden="true"></i>
+            </button>
+          </div>
+          <p id="vaultLoginMessage" class="vault-auth-message" role="status"></p>
+          <button type="submit" class="vault-primary-button">Sign in securely</button>
+        </form>
+      </div>
+
+      <div id="vaultDashboardView" class="vault-dashboard hidden">
+        <div class="vault-dashboard-toolbar">
+          <div>
+            <h3>Private records</h3>
+            <p>Records stay in the local SQLite database on this computer.</p>
+          </div>
+          <button type="button" class="vault-secondary-button" onclick="loadVaultData()">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i> Refresh
+          </button>
+        </div>
+        <div id="vaultSummary" class="vault-summary-grid"></div>
+        <div class="vault-records-toolbar">
+          <label for="vaultRecordType">Record type</label>
+          <select id="vaultRecordType" onchange="loadVaultRecords()">
+            <option value="admissions">Admission applications</option>
+            <option value="students">Students</option>
+            <option value="attendance">Attendance</option>
+            <option value="fees">Fee payments</option>
+            <option value="campuses">Campuses</option>
+            <option value="notifications">Notifications</option>
+          </select>
+          <span id="vaultRecordCount"></span>
+        </div>
+        <div id="vaultRecords" class="vault-records-table-wrap">
+          <p class="vault-empty-state">Choose Refresh to load private records.</p>
+        </div>
+        <footer class="vault-dashboard-footer">
+          <span><i data-lucide="shield" class="w-3.5 h-3.5"></i> Admin session · expires after 8 hours</span>
+          <button type="button" class="vault-logout-button" onclick="logoutDataVault()">Sign out</button>
+        </footer>
+      </div>
+    </section>
+  </div>
+
+  <!-- MODULE INSPECTOR / DELIVERABLE PDF MODAL -->
+  <div id="universalModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl">
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+        <h3 id="uniModalTitle" class="font-bold text-sm text-white">Deliverable Preview</h3>
+        <div class="flex items-center gap-2">
+          <button onclick="window.print()" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white flex items-center gap-1">
+            <i data-lucide="printer" class="w-3.5 h-3.5"></i> Print / Save PDF
+          </button>
+          <button onclick="closeUniversalModal()" class="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+      <div id="uniModalBody" class="p-6 bg-slate-950/60 max-h-[80vh] overflow-y-auto"></div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION STACK -->
+  <div id="toastStack" class="fixed bottom-5 left-5 z-50 space-y-2 max-w-sm w-full pointer-events-none"></div>
+
+  <!-- Main Script -->
+  <script src="script.js"></script>
+</body>
+</html>
